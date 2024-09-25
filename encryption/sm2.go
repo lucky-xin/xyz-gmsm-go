@@ -14,8 +14,8 @@ type SM2Encryption struct {
 }
 
 // NewSM2Encryption
-// privateKeyHex: 私钥16进制字符串
-// publicKeyHex: 公钥16进制字符串
+// privateKeyHex 私钥16进制字符串
+// publicKeyHex 公钥16进制字符串
 func NewSM2Encryption(publicKeyHex, privateKeyHex string) (sm2e *SM2Encryption, err error) {
 	publicKey, err := DecodePublicKey(publicKeyHex)
 	if err != nil {
@@ -54,9 +54,9 @@ func DecodePublicKey(publicKeyHex string) (*sm2.PublicKey, error) {
 }
 
 // DecodePrivateKey 将私钥字符串反序列化转为私钥对象
-// privateKeyHex: 私钥16进制字符串
-// publicKeyHex: 公钥16进制字符串
 // 私钥还原为 sm2.PrivateKey对象(与java中org.bouncycastle.crypto生成的公私钥完全互通使用)
+// privateKeyHex 私钥16进制字符串
+// publicKeyHex 公钥16进制字符串
 func DecodePrivateKey(privateKeyHex, publicKeyHex string) (*sm2.PrivateKey, error) {
 	privateKeyBytes, err := hex.DecodeString(privateKeyHex)
 	if err != nil {
@@ -76,7 +76,9 @@ func DecodePrivateKey(privateKeyHex, publicKeyHex string) (*sm2.PrivateKey, erro
 	return privateKey, nil
 }
 
-// Decrypt 使用私钥对象解密密文字符串. ciphertext 待解密密文字符串; mode 加密模式:0=C1C3C2,1=C1C2C3
+// Decrypt 使用私钥对象解密密文字符串
+// ciphertext 待解密密文字符串
+// mode 加密模式:0=C1C3C2,1=C1C2C3
 func (enc *SM2Encryption) Decrypt(ciphertext string, mode int) (string, error) {
 	decodeString, err := hex.DecodeString(ciphertext)
 	decrypt, err := sm2.Decrypt(enc.privateKey, decodeString, mode)
@@ -87,7 +89,9 @@ func (enc *SM2Encryption) Decrypt(ciphertext string, mode int) (string, error) {
 	return resultStr, nil
 }
 
-// Encrypt  plaintext 待加密明文字符串；mode 加密模式:0=C1C3C2,1=C1C2C3
+// Encrypt 加密
+// plaintext 待加密明文字符串
+// mode 加密模式:0=C1C3C2,1=C1C2C3
 func (enc *SM2Encryption) Encrypt(plaintext string, mode int) (string, error) {
 	encryptStr, _ := sm2.Encrypt(enc.publicKey, []byte(plaintext), rand.Reader, mode)
 	encodeToString := hex.EncodeToString(encryptStr)
