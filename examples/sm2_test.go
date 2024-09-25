@@ -1,6 +1,7 @@
-package encryption
+package examples
 
 import (
+	"github.com/lucky-xin/xyz-gmsm-go/encryption"
 	"github.com/tjfoc/gmsm/sm2"
 	"testing"
 )
@@ -9,7 +10,7 @@ func TestSm2(t *testing.T) {
 	text := "国密算法SM2"
 	publicKey := "04ca5bf8843863d518bfbed316c6b67c7f807fc3436790556c336ddf3a1ca93ae7537f658c222c7f307be57328222256e12d2e26abb8e0160d2501306d64b41266"
 	privateKey := "90bb8703d31503624a526f766cfa47d3d8c10055e94046bf99b56cecc9aa4bb6"
-	sm2e, err := NewSM2Encryption(publicKey, privateKey)
+	sm2e, err := encryption.NewSM2Encryption(publicKey, privateKey)
 	if err != nil {
 		t.Error(err)
 	}
@@ -31,5 +32,4 @@ func TestSm2(t *testing.T) {
 		t.Error(err)
 	}
 	println(decrypt)
-
 }
