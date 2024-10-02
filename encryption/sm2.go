@@ -3,6 +3,7 @@ package encryption
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"github.com/tjfoc/gmsm/sm2"
 	"math/big"
 	"strings"
@@ -81,12 +82,31 @@ func DecodePrivateKey(privateKeyHex, publicKeyHex string) (*sm2.PrivateKey, erro
 // mode 加密模式:0=C1C3C2,1=C1C2C3
 func (enc *SM2Encryption) Decrypt(ciphertext string, mode int) (string, error) {
 	decodeString, err := hex.DecodeString(ciphertext)
+	if err != nil {
+		return "", err
+	}
 	decrypt, err := sm2.Decrypt(enc.privateKey, decodeString, mode)
 	if err != nil {
 		return "", err
 	}
 	resultStr := string(decrypt)
 	return resultStr, nil
+}
+
+// DecryptObject 使用私钥对象解密密文字符串
+// ciphertext 待解密密文字符串
+// mode 加密模式:0=C1C3C2,1=C1C2C3
+// obj 解码对象
+func (enc *SM2Encryption) DecryptObject(ciphertext string, mode int, obj any) error {
+	decodeString, err := hex.DecodeString(ciphertext)
+	if err != nil {
+		return err
+	}
+	decrypt, err := sm2.Decrypt(enc.privateKey, decodeString, mode)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(decrypt, obj)
 }
 
 // Encrypt 加密
