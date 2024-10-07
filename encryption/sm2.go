@@ -113,7 +113,21 @@ func (enc *SM2Encryption) DecryptObject(ciphertext string, mode int, obj any) er
 // plaintext 待加密明文字符串
 // mode 加密模式:0=C1C3C2,1=C1C2C3
 func (enc *SM2Encryption) Encrypt(plaintext string, mode int) (string, error) {
-	encryptStr, _ := sm2.Encrypt(enc.publicKey, []byte(plaintext), rand.Reader, mode)
+	encryptStr, err := sm2.Encrypt(enc.publicKey, []byte(plaintext), rand.Reader, mode)
+	if err != nil {
+		return "", err
+	}
 	encodeToString := hex.EncodeToString(encryptStr)
 	return strings.ToUpper(encodeToString), nil
+}
+
+// EncryptObject 加密JSON对象
+// obj 待加密对象
+// mode 加密模式:0=C1C3C2,1=C1C2C3
+func (enc *SM2Encryption) EncryptObject(obj any, mode int) (string, error) {
+	marshal, err := json.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+	return enc.Encrypt(string(marshal), mode)
 }
