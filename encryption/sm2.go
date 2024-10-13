@@ -2,11 +2,11 @@ package encryption
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"github.com/tjfoc/gmsm/sm2"
 	"math/big"
-	"strings"
 )
 
 type SM2Encryption struct {
@@ -80,17 +80,32 @@ func DecodePrivateKey(privateKeyHex, publicKeyHex string) (*sm2.PrivateKey, erro
 // Decrypt 使用私钥对象解密密文字符串
 // ciphertext 待解密密文字符串
 // mode 加密模式:0=C1C3C2,1=C1C2C3
-func (enc *SM2Encryption) Decrypt(ciphertext string, mode int) (string, error) {
-	decodeString, err := hex.DecodeString(ciphertext)
+func (enc *SM2Encryption) Decrypt(ciphertext []byte, mode int) ([]byte, error) {
+	return sm2.Decrypt(enc.privateKey, ciphertext, mode)
+}
+
+// DecryptHex 使用私钥对象解密密Hex文字符串
+// ciphertext 待解密密文字符串
+// mode 加密模式:0=C1C3C2,1=C1C2C3
+// obj 解码对象
+func (enc *SM2Encryption) DecryptHex(ciphertext string, mode int) ([]byte, error) {
+	decodeByes, err := hex.DecodeString(ciphertext)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	decrypt, err := sm2.Decrypt(enc.privateKey, decodeString, mode)
+	return sm2.Decrypt(enc.privateKey, decodeByes, mode)
+}
+
+// DecryptBase64 使用私钥对象解密密Base64文字符串
+// ciphertext 待解密密文字符串
+// mode 加密模式:0=C1C3C2,1=C1C2C3
+// obj 解码对象
+func (enc *SM2Encryption) DecryptBase64(ciphertext string, mode int) ([]byte, error) {
+	decodeByes, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	resultStr := string(decrypt)
-	return resultStr, nil
+	return sm2.Decrypt(enc.privateKey, decodeByes, mode)
 }
 
 // DecryptObject 使用私钥对象解密密文字符串
@@ -112,22 +127,39 @@ func (enc *SM2Encryption) DecryptObject(ciphertext string, mode int, obj any) er
 // Encrypt 加密
 // plaintext 待加密明文字符串
 // mode 加密模式:0=C1C3C2,1=C1C2C3
-func (enc *SM2Encryption) Encrypt(plaintext string, mode int) (string, error) {
-	encryptStr, err := sm2.Encrypt(enc.publicKey, []byte(plaintext), rand.Reader, mode)
+func (enc *SM2Encryption) Encrypt(plaintext string, mode int) ([]byte, error) {
+	return sm2.Encrypt(enc.publicKey, []byte(plaintext), rand.Reader, mode)
+}
+
+// Encrypt2Hex 加密
+// plaintext 待加密明文字符串
+// mode 加密模式:0=C1C3C2,1=C1C2C3
+func (enc *SM2Encryption) Encrypt2Hex(plaintext string, mode int) (string, error) {
+	encryptedByts, err := enc.Encrypt(plaintext, mode)
 	if err != nil {
 		return "", err
 	}
-	encodeToString := hex.EncodeToString(encryptStr)
-	return strings.ToUpper(encodeToString), nil
+	return hex.EncodeToString(encryptedByts), nil
+}
+
+// Encrypt2Base64 加密
+// plaintext 待加密明文字符串
+// mode 加密模式:0=C1C3C2,1=C1C2C3
+func (enc *SM2Encryption) Encrypt2Base64(plaintext string, mode int) (string, error) {
+	encrypt, err := enc.Encrypt(plaintext, mode)
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(encrypt), err
 }
 
 // EncryptObject 加密JSON对象
 // obj 待加密对象
 // mode 加密模式:0=C1C3C2,1=C1C2C3
-func (enc *SM2Encryption) EncryptObject(obj any, mode int) (string, error) {
+func (enc *SM2Encryption) EncryptObject(obj any, mode int) ([]byte, error) {
 	marshal, err := json.Marshal(obj)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	return enc.Encrypt(string(marshal), mode)
 }
