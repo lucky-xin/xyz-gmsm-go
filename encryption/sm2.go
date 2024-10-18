@@ -9,15 +9,15 @@ import (
 	"math/big"
 )
 
-type SM2Encryption struct {
+type SM2 struct {
 	publicKey  *sm2.PublicKey
 	privateKey *sm2.PrivateKey
 }
 
-// NewSM2Encryption
+// NewSM2
 // privateKeyHex 私钥16进制字符串
 // publicKeyHex 公钥16进制字符串
-func NewSM2Encryption(publicKeyHex, privateKeyHex string) (sm2e *SM2Encryption, err error) {
+func NewSM2(publicKeyHex, privateKeyHex string) (sm2e *SM2, err error) {
 	publicKey, err := DecodePublicKey(publicKeyHex)
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func NewSM2Encryption(publicKeyHex, privateKeyHex string) (sm2e *SM2Encryption, 
 	if err != nil {
 		return nil, err
 	}
-	sm2e = &SM2Encryption{publicKey: publicKey, privateKey: privateKey}
+	sm2e = &SM2{publicKey: publicKey, privateKey: privateKey}
 	return
 }
 
@@ -80,7 +80,7 @@ func DecodePrivateKey(privateKeyHex, publicKeyHex string) (*sm2.PrivateKey, erro
 // Decrypt 使用私钥对象解密密文字符串
 // ciphertext 待解密密文字符串
 // mode 加密模式:0=C1C3C2,1=C1C2C3
-func (enc *SM2Encryption) Decrypt(ciphertext []byte, mode int) ([]byte, error) {
+func (enc *SM2) Decrypt(ciphertext []byte, mode int) ([]byte, error) {
 	return sm2.Decrypt(enc.privateKey, ciphertext, mode)
 }
 
@@ -88,7 +88,7 @@ func (enc *SM2Encryption) Decrypt(ciphertext []byte, mode int) ([]byte, error) {
 // ciphertext 待解密密文字符串
 // mode 加密模式:0=C1C3C2,1=C1C2C3
 // obj 解码对象
-func (enc *SM2Encryption) DecryptHex(ciphertext string, mode int) ([]byte, error) {
+func (enc *SM2) DecryptHex(ciphertext string, mode int) ([]byte, error) {
 	decodeByes, err := hex.DecodeString(ciphertext)
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func (enc *SM2Encryption) DecryptHex(ciphertext string, mode int) ([]byte, error
 // ciphertext 待解密密文字符串
 // mode 加密模式:0=C1C3C2,1=C1C2C3
 // obj 解码对象
-func (enc *SM2Encryption) DecryptBase64(ciphertext string, mode int) ([]byte, error) {
+func (enc *SM2) DecryptBase64(ciphertext string, mode int) ([]byte, error) {
 	decodeByes, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func (enc *SM2Encryption) DecryptBase64(ciphertext string, mode int) ([]byte, er
 // ciphertext 待解密密文字符串
 // mode 加密模式:0=C1C3C2,1=C1C2C3
 // obj 解码对象
-func (enc *SM2Encryption) DecryptObject(ciphertext string, mode int, obj any) error {
+func (enc *SM2) DecryptObject(ciphertext string, mode int, obj any) error {
 	decodeString, err := hex.DecodeString(ciphertext)
 	if err != nil {
 		return err
@@ -127,14 +127,14 @@ func (enc *SM2Encryption) DecryptObject(ciphertext string, mode int, obj any) er
 // Encrypt 加密
 // plaintext 待加密明文字符串
 // mode 加密模式:0=C1C3C2,1=C1C2C3
-func (enc *SM2Encryption) Encrypt(plaintext string, mode int) ([]byte, error) {
+func (enc *SM2) Encrypt(plaintext string, mode int) ([]byte, error) {
 	return sm2.Encrypt(enc.publicKey, []byte(plaintext), rand.Reader, mode)
 }
 
 // Encrypt2Hex 加密
 // plaintext 待加密明文字符串
 // mode 加密模式:0=C1C3C2,1=C1C2C3
-func (enc *SM2Encryption) Encrypt2Hex(plaintext string, mode int) (string, error) {
+func (enc *SM2) Encrypt2Hex(plaintext string, mode int) (string, error) {
 	encryptedByts, err := enc.Encrypt(plaintext, mode)
 	if err != nil {
 		return "", err
@@ -145,7 +145,7 @@ func (enc *SM2Encryption) Encrypt2Hex(plaintext string, mode int) (string, error
 // Encrypt2Base64 加密
 // plaintext 待加密明文字符串
 // mode 加密模式:0=C1C3C2,1=C1C2C3
-func (enc *SM2Encryption) Encrypt2Base64(plaintext string, mode int) (string, error) {
+func (enc *SM2) Encrypt2Base64(plaintext string, mode int) (string, error) {
 	encrypt, err := enc.Encrypt(plaintext, mode)
 	if err != nil {
 		return "", err
@@ -156,7 +156,7 @@ func (enc *SM2Encryption) Encrypt2Base64(plaintext string, mode int) (string, er
 // EncryptObject 加密JSON对象
 // obj 待加密对象
 // mode 加密模式:0=C1C3C2,1=C1C2C3
-func (enc *SM2Encryption) EncryptObject(obj any, mode int) ([]byte, error) {
+func (enc *SM2) EncryptObject(obj any, mode int) ([]byte, error) {
 	marshal, err := json.Marshal(obj)
 	if err != nil {
 		return nil, err
